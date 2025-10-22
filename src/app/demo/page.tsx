@@ -287,6 +287,17 @@ export default function DemoPage() {
           <span>🚨</span>
           Report a Pricing Concern
         </motion.button>
+
+        {/* Team Info */}
+        <motion.div
+          className="mt-6 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+        >
+          <p className="text-sm font-semibold text-gray-900">Team 10</p>
+          <p className="text-xs text-gray-500">Sami-ul Ahmed, Rohith Gokulakrishnan, Sohan Bekkam, Kedar Manoj</p>
+        </motion.div>
       </div>
 
       {/* Report Modal */}

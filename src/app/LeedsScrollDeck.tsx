@@ -783,7 +783,7 @@ export default function LeedsScrollDeck() {
 
           {/* Quote that appears on scroll */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center px-6"
+            className="absolute inset-0 flex items-center px-6"
             initial={false}
             animate={{ 
               opacity: showQuote ? 1 : 0,
@@ -792,9 +792,15 @@ export default function LeedsScrollDeck() {
             }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
           >
-            <h3 className="text-sm md:text-base font-semibold tracking-tight text-center px-12">
-              "Ethical AI Pricing at ShelfSense Markets: Balancing Innovation and Integrity"
-            </h3>
+            <div className="flex items-center gap-8 w-full">
+              <div className="flex flex-col">
+                <h3 className="text-sm font-semibold tracking-tight">{DATA.event.team}</h3>
+                <p className="text-xs text-black/50">{DATA.event.teamMembers}</p>
+              </div>
+              <h3 className="text-sm md:text-base font-semibold tracking-tight text-center flex-1">
+                "Ethical AI Pricing at ShelfSense Markets: Balancing Innovation and Integrity"
+              </h3>
+            </div>
           </motion.div>
         </div>
         {/* Progress bar */}
