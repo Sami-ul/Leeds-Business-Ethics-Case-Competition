@@ -3,6 +3,12 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const CircleMarker = dynamic(() => import('react-leaflet').then(mod => mod.CircleMarker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 /**
  * Leeds Ethics Scroll-Deck — Interactive presentation component
@@ -16,6 +22,267 @@ import { TypeAnimation } from "react-type-animation";
  * - Edit the DATA object below with your case content
  */
 
+// Real Map with Leaflet
+const MountainWestMap = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Import Leaflet CSS
+    import('leaflet/dist/leaflet.css');
+  }, []);
+
+  const stores = [
+    { lat: 43.6150, lon: -116.2023, city: "Boise, ID", count: 8 },
+    { lat: 40.7608, lon: -111.8910, city: "Salt Lake City, UT", count: 22 },
+    { lat: 39.7392, lon: -104.9903, city: "Denver, CO", count: 28 },
+    { lat: 38.8339, lon: -104.8214, city: "Colorado Springs, CO", count: 12 },
+    { lat: 35.0844, lon: -106.6504, city: "Albuquerque, NM", count: 15 },
+    { lat: 41.1400, lon: -104.8202, city: "Cheyenne, WY", count: 7 },
+    { lat: 39.5296, lon: -119.8138, city: "Reno, NV", count: 8 },
+  ];
+
+  if (!mounted) {
+    return (
+      <div className="my-8 max-w-4xl mx-auto bg-slate-900 rounded-xl p-8 shadow-2xl border border-slate-700">
+        <div className="w-full aspect-[16/10] bg-slate-950 rounded-lg flex items-center justify-center text-slate-400">
+          Loading map...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div 
+      className="my-8 max-w-4xl mx-auto bg-slate-900 rounded-xl p-8 shadow-2xl border border-slate-700"
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden border border-slate-700">
+        <MapContainer
+          center={[39.5, -109]}
+          zoom={5}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          dragging={false}
+          scrollWheelZoom={false}
+          doubleClickZoom={false}
+          touchZoom={false}
+        >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+          {stores.map((store, i) => (
+            <CircleMarker
+              key={i}
+              center={[store.lat, store.lon]}
+              radius={Math.sqrt(store.count) * 2}
+              fillColor="#3b82f6"
+              fillOpacity={0.7}
+              color="#60a5fa"
+              weight={2}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <div className="font-bold text-blue-600">{store.city}</div>
+                  <div className="text-gray-700">{store.count} stores</div>
+                </div>
+              </Popup>
+            </CircleMarker>
+          ))}
+        </MapContainer>
+      </div>
+
+      <motion.div 
+        className="mt-4 flex items-center justify-center gap-6 text-sm"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50" />
+          <span className="text-slate-300">Store Location</span>
+        </div>
+        <div className="text-slate-400">Total: <span className="text-blue-400 font-semibold">100 stores</span></div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Escalation Path Diagram
+const EscalationDiagram = () => {
+  return (
+    <motion.div
+      className="my-12 flex flex-col md:flex-row items-center justify-center gap-8 max-w-4xl mx-auto"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      {[
+        { icon: "🏪", label: "Store Rep", desc: "First contact" },
+        { icon: "🌎", label: "Regional Manager", desc: "Review & escalate" },
+        { icon: "⚖️", label: "HR Final Verdict", desc: "Final decision" }
+      ].map((step, i) => (
+        <React.Fragment key={i}>
+          <motion.div
+            className="flex flex-col items-center gap-3 bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-2xl border-2 border-black/10 min-w-[180px]"
+            initial={{ opacity: 0, y: 30, scale: 0.8 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: i * 0.2 }}
+            whileHover={{ scale: 1.05, borderColor: "rgba(0,0,0,0.3)" }}
+          >
+            <div className="text-5xl mb-2">{step.icon}</div>
+            <div className="text-xl font-bold text-gray-900 text-center">{step.label}</div>
+            <div className="text-sm text-gray-600 text-center">{step.desc}</div>
+          </motion.div>
+          {i < 2 && (
+            <motion.div
+              className="hidden md:block text-4xl text-gray-400"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.2 + 0.3 }}
+            >
+              →
+            </motion.div>
+          )}
+        </React.Fragment>
+      ))}
+    </motion.div>
+  );
+};
+
+// Price Guardrails Chart
+const PriceGuardrailsChart = () => {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const dataPoints = 52; // weeks in a year
+  const basePrice = 3.30;
+  const stdDev = 0.15;
+  
+  // Generate mock yearly data with deterministic values (seeded random)
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const historicalPrices = Array.from({ length: dataPoints }, (_, i) => {
+    const trend = Math.sin((i / dataPoints) * Math.PI * 2) * 0.08;
+    const noise = (seededRandom(i * 123.456) - 0.5) * 0.06;
+    return basePrice + trend + noise;
+  });
+
+  const maxPrice = basePrice + stdDev;
+  const minPrice = basePrice - stdDev;
+  const chartMax = basePrice + stdDev + 0.1;
+  const chartMin = basePrice - stdDev - 0.1;
+
+  if (!mounted) {
+    return (
+      <div className="my-12 p-8 bg-white rounded-2xl border border-black/10 shadow-lg h-[500px] flex items-center justify-center">
+        <div className="text-gray-400">Loading chart...</div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className="my-12 p-8 bg-white rounded-2xl border border-black/10 shadow-lg"
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <h3 className="text-2xl font-bold mb-6 text-gray-900">Price Boundaries: ±1 Standard Deviation</h3>
+      
+      <div className="relative h-80">
+        {/* Y-axis labels */}
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 pr-3">
+          <span>${chartMax.toFixed(2)}</span>
+          <span>${basePrice.toFixed(2)}</span>
+          <span>${chartMin.toFixed(2)}</span>
+        </div>
+
+        {/* Chart area */}
+        <div className="ml-14 h-full relative">
+          {/* Upper bound line (red) */}
+          <motion.div
+            className="absolute w-full border-t-2 border-red-500 border-dashed"
+            style={{ top: '15%' }}
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.5 }}
+          >
+            <span className="absolute -top-6 right-0 text-xs font-semibold text-red-600">
+              Upper Bound (+$0.15)
+            </span>
+          </motion.div>
+
+          {/* Lower bound line (red) */}
+          <motion.div
+            className="absolute w-full border-t-2 border-red-500 border-dashed"
+            style={{ bottom: '15%' }}
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.5 }}
+          >
+            <span className="absolute -bottom-6 right-0 text-xs font-semibold text-red-600">
+              Lower Bound (-$0.15)
+            </span>
+          </motion.div>
+
+          {/* Historical price line (blue) */}
+          <svg className="w-full h-full" viewBox={`0 0 ${dataPoints * 10} 100`} preserveAspectRatio="none">
+            <motion.path
+              d={historicalPrices.map((price, i) => {
+                const x = i * 10;
+                const y = 100 - ((price - chartMin) / (chartMax - chartMin)) * 100;
+                return i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+              }).join('')}
+              stroke="#3B82F6"
+              strokeWidth="3"
+              fill="none"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+          </svg>
+
+          {/* Shaded area between bounds */}
+          <div 
+            className="absolute w-full bg-red-100/30"
+            style={{ top: '15%', bottom: '15%' }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-0.5 bg-blue-500"></div>
+          <span className="text-gray-700">Historical Price (1 year)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-0.5 border-t-2 border-red-500 border-dashed"></div>
+          <span className="text-gray-700">AI Price Boundaries</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 // Animated Eye Icon for Transparency
 const AnimatedEye = () => {
   return (
@@ -27,7 +294,7 @@ const AnimatedEye = () => {
       className="mx-auto mb-8"
       initial={{ scale: 0, rotate: -180 }}
       whileInView={{ scale: 1, rotate: 0 }}
-      viewport={{ once: false, margin: "-20%" }}
+      viewport={{ once: true, margin: "-20%" }}
       transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
     >
       {/* Eye outline */}
@@ -38,7 +305,7 @@ const AnimatedEye = () => {
         fill="none"
         initial={{ pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
-        viewport={{ once: false }}
+        viewport={{ once: true }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
       />
       {/* Iris */}
@@ -134,8 +401,8 @@ const DATA = {
       template: "standard",
       kicker: "Context",
       headline: "ShelfSense Markets",
+      showMap: true,
       bullets: [
-        "Midsized grocery chain with ~100 stores in mountain West region",
         "Operating on razor-thin profit margins",
         "Uses Helios AI pricing technology that changes prices in real-time",
         "Goal: Increase profits and reduce waste through dynamic pricing"
@@ -178,52 +445,67 @@ const DATA = {
       kicker: "Preventing the dependence tax",
       headline: "Protecting Vulnerable Customers",
       bullets: [
-        "Price ceiling and floor for all goods—customers will not be charged over the limit",
+        "Price ceiling and floor for all goods: customers will not be charged over the limit",
         "Late-hour freeze: Prices locked 2 hours before closing, reverting to midday baseline",
-        "Large screens (front & back of store) display top 5 most common items' price fluctuations",
+        "Interactive kiosks for price explainability: no phone needed, more equitable access",
         "QR codes on each product provide in-depth reasons for price changes",
-        "Prices reduced for goods close to expiration—lowering waste"
+        "Prices reduced for goods close to expiration: lowering waste"
       ]
     },
     {
-      id: "transparency",
-      label: "Transparency & Communication",
+      id: "transparency-app",
+      label: "Transparency: App",
       template: "standard",
       kicker: "Full disclosure",
-      headline: "What We'll Disclose—At Shelf, In App, On Web",
-      icon: "eye",
+      headline: "ShelfSense Mobile App",
       bullets: [
-        "Mobile app with live price updates for all products",
-        "If price is above/below industry standard, customers see which factors influence it most",
-        "Price history available on app so customers feel assured prices aren't individual-based",
-        "Customers can report absurd prices—public fairness intuition as correction",
-        "Company-wide Ethics department to address price reports",
-        "Clear escalation path: Store rep → Regional manager → HR final verdict"
+        "Live price updates for all products in real-time",
+        "Price history shows trends so customers know prices aren't personalized",
+        "If price is above/below industry standard, see which factors influence it most",
+        "QR codes on each product link directly to explanations"
+      ]
+    },
+    {
+      id: "transparency-demo",
+      label: "Transparency: Demo",
+      template: "standard",
+      kicker: "Try it yourself",
+      headline: "Experience It Live",
+      showQRCode: true,
+      bullets: [
+        "Scan the QR code to see a live demo",
+        "Real-time price transparency in action",
+        "Interactive price history charts",
+        "Customer reporting interface"
+      ]
+    },
+    {
+      id: "transparency-reporting",
+      label: "Transparency: Reporting",
+      template: "standard",
+      kicker: "Customer voice",
+      headline: "Report & Escalate Concerns",
+      showEscalation: true,
+      bullets: [
+        "Customers can report unfair prices directly through the app",
+        "Public fairness intuition serves as a correction mechanism",
+        "Company-wide Ethics department reviews all reports",
+        "Clear escalation path ensures accountability"
       ]
     },
     {
       id: "guardrails",
       label: "Guardrails & Governance",
-      template: "split",
+      template: "standard",
       kicker: "Non-negotiable boundaries",
       headline: "Hard Limits on AI Autonomy",
-      sections: [
-        {
-          title: "Price Guardrails",
-          items: [
-            "Use past year of price data from surrounding stores as baseline",
-            "Helios bounded to ±1 standard deviation from yearly mean",
-            "Fresh data accounts for inflation and natural fluctuations"
-          ]
-        },
-        {
-          title: "Continuous Improvement",
-          items: [
-            "Periodic audits by independent third-party reviewers",
-            "Annual ethics certification training for all Helios overseers",
-            "Decision logs reviewed for compliance with ethical principles"
-          ]
-        }
+      showPriceChart: true,
+      bullets: [
+        "Use past year of price data from surrounding stores as baseline",
+        "Helios bounded to ±1 standard deviation from yearly mean",
+        "Fresh data accounts for inflation and natural fluctuations",
+        "Periodic audits by independent third-party reviewers",
+        "Annual ethics certification training for all Helios overseers"
       ]
     },
     {
@@ -236,7 +518,7 @@ const DATA = {
         "Track complaints and perceived fairness via end-of-shopping surveys",
         "Customer accounts (phone/email) with survey incentives (coupons)",
         "Monitor: trust levels, complaint mix, opt-in rates for notifications",
-        "If overwhelming negative response → AI overseer intervenes (e.g., lowers prices)"
+        "If overwhelming negative response: AI overseer intervenes (e.g., lowers prices)"
       ]
     },
     {
@@ -246,9 +528,9 @@ const DATA = {
       kicker: "Tough questions",
       headline: "Addressing Concerns",
       bullets: [
-        "Why not disable Helios? → We need efficiency, but fairness comes first",
-        "Won't transparency hurt profits? → Trust is our competitive advantage",
-        "What if competitors don't follow? → We lead on integrity, not follow the pack"
+        "Why not disable Helios?: We need efficiency, but fairness comes first",
+        "Won't transparency hurt profits?: Trust is our competitive advantage",
+        "What if competitors don't follow?: We lead on integrity, not follow the pack"
       ]
     }
   ]
@@ -505,7 +787,7 @@ export default function LeedsScrollDeck() {
               className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center py-20 border-t border-black/10 snap-start snap-always"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: false, margin: "-20%", amount: 0.3 }}
+              viewport={{ once: true, margin: "-20%", amount: 0.1 }}
               transition={{ duration: 0.8 }}
             >
               {/* Section number and kicker with varied animation */}
@@ -513,7 +795,7 @@ export default function LeedsScrollDeck() {
                 className="flex items-baseline gap-4 mb-4"
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, margin: "-20%" }}
+                viewport={{ once: true, margin: "-20%" }}
                 transition={{ 
                   duration: 0.6, 
                   delay: 0.1,
@@ -527,10 +809,10 @@ export default function LeedsScrollDeck() {
                 <p className="text-black/40 uppercase tracking-[0.25em] text-[10px] font-medium">{s.kicker}</p>
               </motion.div>
               <motion.h2 
-                className="text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-8"
+                className="text-3xl md:text-5xl font-bold leading-[1.05] tracking-tight mb-8"
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: false, margin: "-20%" }}
+                viewport={{ once: true, margin: "-20%" }}
                 transition={{ 
                   duration: 0.8, 
                   delay: 0.2,
@@ -543,19 +825,48 @@ export default function LeedsScrollDeck() {
                 />
               </motion.h2>
 
-            {/* Render icon if specified */}
-            {(s as any).icon === 'eye' && <AnimatedEye />}
+            <div className="w-full">
+              {/* Render special components */}
+              {(s as any).showMap && <MountainWestMap />}
 
-            {/* Template-based content rendering */}
+              {(s as any).showQRCode && (
+                <motion.div
+                  className="flex flex-col items-center gap-4 my-8 p-6 bg-white/50 rounded-2xl border border-black/10"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="bg-white p-4 rounded-xl shadow-lg">
+                    <img 
+                      src="/qr-demo.png" 
+                      alt="QR Code to Demo"
+                      width={200}
+                      height={200}
+                      className="block"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-900">Try it yourself!</p>
+                    <p className="text-sm text-gray-600">Scan to see the customer experience</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {(s as any).showEscalation && <EscalationDiagram />}
+              
+              {(s as any).showPriceChart && <PriceGuardrailsChart />}
+
+              {/* Template-based content rendering */}
             {s.template === 'standard' && s.bullets && (
-              <ul className="space-y-5 text-xl md:text-2xl text-black/80 leading-relaxed">
+              <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed">
                 {s.bullets.map((b, i) => (
                   <motion.li 
                     key={i} 
                     className="flex items-start gap-4 group"
                     initial={{ opacity: 0, x: -30, y: 10 }}
                     whileInView={{ opacity: 1, x: 0, y: 0 }}
-                    viewport={{ once: false, margin: "-20%" }}
+                    viewport={{ once: true, margin: "-20%" }}
                     transition={{ duration: 0.6, delay: 0.3 + i * 0.08, type: "spring", stiffness: 120 }}
                     whileHover={{ x: 10, scale: 1.02, transition: { duration: 0.2 } }}
                   >
@@ -577,10 +888,10 @@ export default function LeedsScrollDeck() {
                 {s.bullets.map((b, i) => (
                   <motion.li
                     key={i}
-                    className="text-2xl md:text-3xl font-medium text-black/90 border-l-4 border-black pl-6 py-2"
+                    className="text-xl md:text-2xl font-medium text-black/90 border-l-4 border-black pl-6 py-2"
                     initial={{ opacity: 0, x: -50, scale: 0.95 }}
                     whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                    viewport={{ once: false, margin: "-20%" }}
+                    viewport={{ once: true, margin: "-20%" }}
                     transition={{ duration: 0.7, delay: 0.3 + i * 0.1, type: "spring", stiffness: 100 }}
                   >
                     {b}
@@ -594,7 +905,7 @@ export default function LeedsScrollDeck() {
                 className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8"
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: false, margin: "-20%" }}
+                viewport={{ once: true, margin: "-20%" }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
                 {s.bullets.map((b, i) => (
@@ -603,7 +914,7 @@ export default function LeedsScrollDeck() {
                     className="border border-black/10 p-6 text-center hover:border-black/30 transition-all hover:shadow-lg"
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false, margin: "-20%" }}
+                    viewport={{ once: true, margin: "-20%" }}
                     transition={{ duration: 0.5, delay: 0.4 + i * 0.08 }}
                     whileHover={{ y: -5, scale: 1.05 }}
                   >
@@ -621,7 +932,7 @@ export default function LeedsScrollDeck() {
                     className="border border-black/10 p-8 hover:border-black/20 transition-all"
                     initial={{ opacity: 0, y: 40, scale: 0.95 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: false, margin: "-20%" }}
+                    viewport={{ once: true, margin: "-20%" }}
                     transition={{ duration: 0.7, delay: 0.3 + i * 0.15, type: "spring" }}
                   >
                     <h3 className="text-2xl md:text-3xl font-bold mb-6 text-black/90">{section.title}</h3>
@@ -632,7 +943,7 @@ export default function LeedsScrollDeck() {
                           className="flex items-start gap-3 text-lg md:text-xl text-black/80"
                           initial={{ opacity: 0, x: -20 }}
                           whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: false, margin: "-20%" }}
+                          viewport={{ once: true, margin: "-20%" }}
                           transition={{ duration: 0.5, delay: 0.5 + j * 0.08 }}
                         >
                           <span className="text-black/30 mt-1">•</span>
@@ -644,13 +955,14 @@ export default function LeedsScrollDeck() {
                 ))}
               </div>
             )}
+            </div>
 
             {/* Footer crumbs */}
             <motion.div 
               className="mt-12 flex items-center gap-3 text-black/30 text-xs"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              viewport={{ once: false, margin: "-20%" }}
+              viewport={{ once: true, margin: "-20%" }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
               <span className="font-mono">Section {idx + 1} / {DATA.sections.length}</span>
@@ -663,14 +975,14 @@ export default function LeedsScrollDeck() {
           className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center border-t border-black/10 py-24 snap-start snap-always"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: false, margin: "-20%" }}
+          viewport={{ once: true, margin: "-20%" }}
           transition={{ duration: 1 }}
         >
           <motion.p 
             className="text-black/40 uppercase tracking-[0.25em] text-[10px] font-medium mb-4"
             initial={{ opacity: 0, x: -30, scale: 0.9 }}
             whileInView={{ opacity: 1, x: 0, scale: 1 }}
-            viewport={{ once: false, margin: "-20%" }}
+            viewport={{ once: true, margin: "-20%" }}
             transition={{ 
               duration: 0.7, 
               delay: 0.2,
@@ -684,7 +996,7 @@ export default function LeedsScrollDeck() {
             className="text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-6"
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: false, margin: "-20%" }}
+            viewport={{ once: true, margin: "-20%" }}
             transition={{ 
               duration: 0.9, 
               delay: 0.3,
@@ -700,7 +1012,7 @@ export default function LeedsScrollDeck() {
             className="text-xl text-black/70 max-w-3xl mb-8"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, margin: "-20%" }}
+            viewport={{ once: true, margin: "-20%" }}
             transition={{ 
               duration: 0.7, 
               delay: 0.5,
@@ -715,7 +1027,7 @@ export default function LeedsScrollDeck() {
             className="inline-flex items-center gap-2 text-sm font-medium text-black/60 hover:text-black"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: "-20%" }}
+            viewport={{ once: true, margin: "-20%" }}
             transition={{ 
               duration: 0.6, 
               delay: 0.7,
