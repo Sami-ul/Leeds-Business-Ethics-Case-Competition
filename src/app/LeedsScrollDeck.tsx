@@ -59,9 +59,8 @@ const MountainWestMap = () => {
       transition={{ duration: 0.8 }}
     >
       <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden border border-slate-700">
-        {/* @ts-ignore - React Leaflet type issues with dynamic imports */}
         <MapContainer
-          center={[39.5, -109] as [number, number]}
+          center={[39.5, -109]}
           zoom={5}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
@@ -70,23 +69,20 @@ const MountainWestMap = () => {
           doubleClickZoom={false}
           touchZoom={false}
         >
-          {/* @ts-ignore */}
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           {stores.map((store, i) => (
-            // @ts-ignore
             <CircleMarker
               key={i}
-              center={[store.lat, store.lon] as [number, number]}
+              center={[store.lat, store.lon]}
               radius={Math.sqrt(store.count) * 2}
               fillColor="#3b82f6"
               fillOpacity={0.7}
               color="#60a5fa"
               weight={2}
             >
-              {/* @ts-ignore */}
               <Popup>
                 <div className="text-sm">
                   <div className="font-bold text-blue-600">{store.city}</div>
