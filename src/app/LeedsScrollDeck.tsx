@@ -722,14 +722,14 @@ export default function LeedsScrollDeck() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Track scroll to show/hide quote in nav
+  // Track scroll to show/hide quote in nav - use passive listener for performance
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY || document.documentElement.scrollTop;
       setShowQuote(scrolled > 200);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -748,11 +748,7 @@ export default function LeedsScrollDeck() {
 
   return (
     <div 
-      className={"min-h-screen w-full bg-white text-black relative snap-y snap-mandatory" + (printMode ? " print:bg-white! print:text-black!" : "")} 
-      style={{ 
-        scrollSnapType: 'y mandatory', 
-        position: 'relative'
-      }}
+      className={"min-h-screen w-full bg-white text-black relative" + (printMode ? " print:bg-white! print:text-black!" : "")}
     >
 
       {/* Top navigation bar - Palantir-inspired semi-transparent with quote */}
@@ -815,14 +811,14 @@ export default function LeedsScrollDeck() {
         ))}
       </aside>
 
-      {/* Hero - Apple-style scroll animations */}
+      {/* Hero */}
       <section 
         ref={(el) => {
           heroRef.current = el as HTMLDivElement;
           if (el) sectionRefs.current.set('hero', el);
         }} 
         id="hero" 
-        className="relative flex items-center justify-center min-h-screen px-6 pt-20 overflow-hidden snap-start snap-always"
+        className="relative flex items-center justify-center min-h-screen px-6 pt-20"
       >
         {/* Geometric background shape with parallax */}
         <div 
@@ -867,20 +863,16 @@ export default function LeedsScrollDeck() {
         </div>
       </section>
 
-      {/* Panels - Apple-style scroll animations */}
+      {/* Panels */}
       <main className="px-6">
         {DATA.sections.map((s, idx) => (
-            <motion.section
+            <section
               id={s.id}
               key={s.id}
               ref={(el) => {
                 if (el) sectionRefs.current.set(s.id, el);
               }}
-              className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center py-20 border-t border-black/10 snap-start snap-always"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-20%", amount: 0.1 }}
-              transition={{ duration: 0.8 }}
+              className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center py-20 border-t border-black/10"
             >
               {/* Section number and kicker with varied animation */}
               {s.template !== 'transition' && (
@@ -904,7 +896,27 @@ export default function LeedsScrollDeck() {
 
             <div className="w-full">
               {/* Template-based content rendering - render bullets first for intro slide */}
-            {s.template === 'standard' && s.bullets && (
+            {s.template === 'standard' && s.bullets && (s as any).showSupplyDemand ? (
+              // Special layout for slide 5: bullets and graph side by side
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed flex-1">
+                  {s.bullets.map((b, i) => (
+                    <li 
+                      key={i} 
+                      className="flex items-start gap-4 group"
+                    >
+                      <span className="text-black/20 font-mono text-lg mt-2 group-hover:text-black/60 transition-colors">
+                        —
+                      </span>
+                      <span dangerouslySetInnerHTML={{ __html: b }} className="flex-1" />
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex-1">
+                  <SupplyDemandGraph />
+                </div>
+              </div>
+            ) : s.template === 'standard' && s.bullets ? (
               <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed mb-8">
                 {s.bullets.map((b, i) => (
                   <li 
@@ -918,7 +930,7 @@ export default function LeedsScrollDeck() {
                   </li>
                 ))}
               </ul>
-            )}
+            ) : null}
 
               {/* Render special components */}
               {(s as any).showMap && <MountainWestMap />}
@@ -953,7 +965,8 @@ export default function LeedsScrollDeck() {
 
               {(s as any).showEscalation && <EscalationDiagram />}
               
-              {(s as any).showSupplyDemand && <SupplyDemandGraph />}
+              {/* Only render SupplyDemandGraph if not already rendered side-by-side with bullets */}
+              {(s as any).showSupplyDemand && !s.bullets && <SupplyDemandGraph />}
               
               {(s as any).showPriceChart && <PriceGuardrailsChart />}
 
@@ -1017,91 +1030,39 @@ export default function LeedsScrollDeck() {
             </div>
 
             {/* Footer crumbs */}
-            <motion.div 
-              className="mt-12 flex items-center gap-3 text-black/30 text-xs"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-20%" }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
+            <div className="mt-12 flex items-center gap-3 text-black/30 text-xs">
               <span className="font-mono">Section {idx + 1} / {DATA.sections.length}</span>
-            </motion.div>
-          </motion.section>
+            </div>
+          </section>
         ))}
 
-        {/* Footer with Apple-style animation */}
-        <motion.section 
-          className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center border-t border-black/10 py-24 snap-start snap-always"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-20%" }}
-          transition={{ duration: 1 }}
+        {/* Footer */}
+        <section 
+          className="min-h-screen max-w-6xl mx-auto flex flex-col justify-center border-t border-black/10 py-24"
         >
-          <motion.p 
+          <p 
             className="text-black/40 uppercase tracking-[0.25em] text-[10px] font-medium mb-4"
-            initial={{ opacity: 0, x: -30, scale: 0.9 }}
-            whileInView={{ opacity: 1, x: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ 
-              duration: 0.7, 
-              delay: 0.2,
-              type: "spring",
-              stiffness: 120
-            }}
           >
             Conclusion
-          </motion.p>
-          <motion.h2 
+          </p>
+          <h2 
             className="text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-6"
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ 
-              duration: 0.9, 
-              delay: 0.3,
-              type: "spring",
-              stiffness: 70
-            }}
           >
             <TypewriterOnView 
               text="Thank you, any questions?"
             />
-          </motion.h2>
-          <motion.p 
+          </h2>
+          <p 
             className="text-xl text-black/70 max-w-3xl mb-8"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ 
-              duration: 0.7, 
-              delay: 0.5,
-              type: "spring",
-              stiffness: 100
-            }}
           >
-          </motion.p>
-          <motion.a 
+          </p>
+          <a 
             href="#hero" 
-            className="inline-flex items-center gap-2 text-sm font-medium text-black/60 hover:text-black"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20%" }}
-            transition={{ 
-              duration: 0.6, 
-              delay: 0.7,
-              type: "spring",
-              stiffness: 120
-            }}
-            whileHover={{ 
-              x: 5,
-              gap: "1rem",
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 text-sm font-medium text-black/60 hover:text-black transition-colors"
           >
             ↑ Back to top
-          </motion.a>
-        </motion.section>
+          </a>
+        </section>
       </main>
 
       {/* Print helpers */}
