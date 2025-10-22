@@ -31,18 +31,30 @@ const MountainWestMap = () => {
   }, []);
 
   const stores = [
-    { lat: 43.6150, lon: -116.2023, city: "Boise, ID", count: 8 },
-    { lat: 40.7608, lon: -111.8910, city: "Salt Lake City, UT", count: 22 },
-    { lat: 39.7392, lon: -104.9903, city: "Denver, CO", count: 28 },
-    { lat: 38.8339, lon: -104.8214, city: "Colorado Springs, CO", count: 12 },
-    { lat: 35.0844, lon: -106.6504, city: "Albuquerque, NM", count: 15 },
-    { lat: 41.1400, lon: -104.8202, city: "Cheyenne, WY", count: 7 },
-    { lat: 39.5296, lon: -119.8138, city: "Reno, NV", count: 8 },
+    // Colorado - Dense urban corridors (70 stores)
+    { lat: 39.7392, lon: -104.9903, city: "Denver Metro", count: 35, type: "urban" },
+    { lat: 38.8339, lon: -104.8214, city: "Colorado Springs", count: 18, type: "urban" },
+    { lat: 40.5853, lon: -105.0844, city: "Fort Collins", count: 10, type: "suburban" },
+    { lat: 39.5501, lon: -105.7821, city: "Aurora/Lakewood", count: 7, type: "low-access" },
+    
+    // Utah - Suburban neighborhoods (50 stores)
+    { lat: 40.7608, lon: -111.8910, city: "Salt Lake City Metro", count: 28, type: "urban" },
+    { lat: 40.2338, lon: -111.6585, city: "Provo/Orem", count: 12, type: "suburban" },
+    { lat: 41.2230, lon: -111.9738, city: "Ogden", count: 10, type: "low-access" },
+    
+    // New Mexico - Low-access tracts (40 stores)
+    { lat: 35.0844, lon: -106.6504, city: "Albuquerque", count: 22, type: "urban" },
+    { lat: 32.3199, lon: -106.7637, city: "Las Cruces", count: 10, type: "low-access" },
+    { lat: 35.6870, lon: -105.9378, city: "Santa Fe", count: 8, type: "suburban" },
+    
+    // Wyoming - Rural/low-access (20 stores)
+    { lat: 41.1400, lon: -104.8202, city: "Cheyenne", count: 12, type: "low-access" },
+    { lat: 42.8666, lon: -106.3131, city: "Casper", count: 8, type: "low-access" }
   ];
 
   if (!mounted) {
     return (
-      <div className="my-8 max-w-4xl mx-auto bg-slate-900 rounded-xl p-8 shadow-2xl border border-slate-700">
+      <div className="my-8 max-w-3xl mx-auto bg-slate-900 rounded-xl p-6 shadow-2xl border border-slate-700">
         <div className="w-full aspect-[16/10] bg-slate-950 rounded-lg flex items-center justify-center text-slate-400">
           Loading map...
         </div>
@@ -52,7 +64,7 @@ const MountainWestMap = () => {
 
   return (
     <motion.div 
-      className="my-8 max-w-4xl mx-auto bg-slate-900 rounded-xl p-8 shadow-2xl border border-slate-700"
+      className="my-8 max-w-3xl mx-auto bg-slate-900 rounded-xl p-6 shadow-2xl border border-slate-700 relative z-10"
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, amount: 0.1 }}
@@ -78,15 +90,24 @@ const MountainWestMap = () => {
               key={i}
               center={[store.lat, store.lon]}
               radius={Math.sqrt(store.count) * 2}
-              fillColor="#3b82f6"
+              fillColor={
+                store.type === 'urban' ? '#3b82f6' : 
+                store.type === 'suburban' ? '#8b5cf6' : 
+                '#ef4444'
+              }
               fillOpacity={0.7}
-              color="#60a5fa"
+              color={
+                store.type === 'urban' ? '#60a5fa' : 
+                store.type === 'suburban' ? '#a78bfa' : 
+                '#f87171'
+              }
               weight={2}
             >
               <Popup>
                 <div className="text-sm">
                   <div className="font-bold text-blue-600">{store.city}</div>
                   <div className="text-gray-700">{store.count} stores</div>
+                  <div className="text-xs text-gray-500 capitalize">{store.type === 'low-access' ? 'USDA Low-Access' : store.type}</div>
                 </div>
               </Popup>
             </CircleMarker>
@@ -95,7 +116,7 @@ const MountainWestMap = () => {
       </div>
 
       <motion.div 
-        className="mt-4 flex items-center justify-center gap-6 text-sm"
+        className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -103,9 +124,17 @@ const MountainWestMap = () => {
       >
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50" />
-          <span className="text-slate-300">Store Location</span>
+          <span className="text-slate-300">Urban Corridors</span>
         </div>
-        <div className="text-slate-400">Total: <span className="text-blue-400 font-semibold">100 stores</span></div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50" />
+          <span className="text-slate-300">Suburban</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg shadow-red-500/50" />
+          <span className="text-slate-300">USDA Low-Access</span>
+        </div>
+        <div className="text-slate-400 ml-4">4 States • <span className="text-blue-400 font-semibold">180 stores</span></div>
       </motion.div>
     </motion.div>
   );
@@ -124,7 +153,7 @@ const EscalationDiagram = () => {
       {[
         { icon: "🏪", label: "Store Rep", desc: "First contact" },
         { icon: "🌎", label: "Regional Manager", desc: "Review & escalate" },
-        { icon: "⚖️", label: "HR Final Verdict", desc: "Final decision" }
+        { icon: "⚖️", label: "Company Ethics Committee", desc: "Final decision" }
       ].map((step, i) => (
         <React.Fragment key={i}>
           <motion.div
@@ -201,7 +230,7 @@ const PriceGuardrailsChart = () => {
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
     >
-      <h3 className="text-2xl font-bold mb-6 text-gray-900">Price Boundaries: ±1 Standard Deviation</h3>
+      <h3 className="text-2xl font-bold mb-6 text-gray-900">Price Boundaries</h3>
       
       <div className="relative h-80">
         {/* Y-axis labels */}
@@ -386,7 +415,8 @@ const TypewriterOnView = ({ text, onComplete }: { text: string; onComplete?: () 
 const DATA = {
   event: {
     title: "Leeds Business Ethics Case Competition",
-    team: "Team: Sami + Co.",
+    team: "Team 10",
+    teamMembers: "Sami-ul Ahmed, Rohith Gokulakrishnan, Sohan Bekkam, Kedar Manoj",
     date: "Round 1 — Wed, Oct 22, 2025",
   },
   caseTitle: "ShelfSense Markets: Ethical AI Pricing with Helios",
@@ -401,6 +431,8 @@ const DATA = {
       headline: "ShelfSense Markets",
       showMap: true,
       bullets: [
+        "4 Mountain West states: CO, UT, NM, WY",
+        "Mix of dense urban corridors, suburban neighborhoods, and USDA-defined low-access tracts",
         "Operating on razor-thin profit margins",
         "Uses Helios AI pricing technology that changes prices in real-time",
         "Goal: Increase profits and reduce waste through dynamic pricing"
@@ -411,13 +443,20 @@ const DATA = {
       label: "Ethical Problem",
       template: "emphasis",
       kicker: "The Crisis",
-      headline: "The Milk Incident: $3.39 → $4.29",
+      headline: "Current Problems",
       bullets: [
+        "The milk incident: $3.39 → $4.29",
         "Fairness risk: Unfair prices at certain times of day",
         "Customers cannot see why prices are changing",
-        "\"Fairness is a law of nature and not something to be manipulated.\"",
-        "Will we treat fairness as a constraint (like thermodynamics) or reverse-engineer it?"
+        "\"Fairness is a law of nature and not something to be manipulated.\""
       ]
+    },
+    {
+      id: "solution-transition",
+      label: "Our Solution",
+      template: "transition",
+      kicker: "",
+      headline: "Our Solution"
     },
     {
       id: "framework",
@@ -425,6 +464,7 @@ const DATA = {
       template: "grid",
       kicker: "Daniels Fund Ethics",
       headline: "Eight Principles Guide Our Solutions",
+      showDanielsLogo: true,
       bullets: [
         "Integrity",
         "Trust", 
@@ -443,11 +483,10 @@ const DATA = {
       kicker: "Preventing the dependence tax",
       headline: "Protecting Vulnerable Customers",
       bullets: [
-        "Price ceiling and floor for all goods: customers will not be charged over the limit",
-        "Late-hour freeze: Prices locked 2 hours before closing, reverting to midday baseline",
-        "Interactive kiosks for price explainability: no phone needed, more equitable access",
-        "QR codes on each product provide in-depth reasons for price changes",
-        "Prices reduced for goods close to expiration: lowering waste"
+        "Price ceiling and floor for all goods",
+        "Late-hour freeze",
+        "Lowering waste",
+        "Interactive kiosks & product QR codes"
       ]
     },
     {
@@ -457,10 +496,9 @@ const DATA = {
       kicker: "Full disclosure",
       headline: "ShelfSense Mobile App",
       bullets: [
-        "Live price updates for all products in real-time",
-        "Price history shows trends so customers know prices aren't personalized",
-        "If price is above/below industry standard, see which factors influence it most",
-        "QR codes on each product link directly to explanations"
+        "Live price updates",
+        "Price history: customers know prices aren't personalized",
+        "Price changed? See which factors influence it most."
       ]
     },
     {
@@ -469,13 +507,7 @@ const DATA = {
       template: "standard",
       kicker: "Try it yourself",
       headline: "Experience It Live",
-      showQRCode: true,
-      bullets: [
-        "Scan the QR code to see a live demo",
-        "Real-time price transparency in action",
-        "Interactive price history charts",
-        "Customer reporting interface"
-      ]
+      showQRCode: true
     },
     {
       id: "transparency-reporting",
@@ -487,8 +519,7 @@ const DATA = {
       bullets: [
         "Customers can report unfair prices directly through the app",
         "Public fairness intuition serves as a correction mechanism",
-        "Company-wide Ethics department reviews all reports",
-        "Clear escalation path ensures accountability"
+        "Ethics department reviews reports"
       ]
     },
     {
@@ -499,11 +530,12 @@ const DATA = {
       headline: "Hard Limits on AI Autonomy",
       showPriceChart: true,
       bullets: [
-        "Use past year of price data from surrounding stores as baseline",
-        "Helios bounded to ±1 standard deviation from yearly mean",
-        "Fresh data accounts for inflation and natural fluctuations",
-        "Periodic audits by independent third-party reviewers",
-        "Annual ethics certification training for all Helios overseers"
+        "Past year of price data from 5-miles radius as baseline",
+        "Helios bounded relative to standard deviations from yearly mean",
+        "Ethics department approves all framing engine copy before customer-facing deployment",
+        "Fresh data",
+        "Third-party audits",
+        "Annual ethics certification/training"
       ]
     },
     {
@@ -513,10 +545,9 @@ const DATA = {
       kicker: "Non-financial KPIs",
       headline: "What We Track & When We Roll Back",
       bullets: [
-        "Track complaints and perceived fairness via end-of-shopping surveys",
-        "Customer accounts (phone/email) with survey incentives (coupons)",
-        "Monitor: trust levels, complaint mix, opt-in rates for notifications",
-        "If overwhelming negative response: AI overseer intervenes (e.g., lowers prices)"
+        "End-of-shopping surveys",
+        "Monitor trust levels",
+        "Overwhelming negative response? Ethics committee intervenes."
       ]
     },
     {
@@ -526,7 +557,7 @@ const DATA = {
       kicker: "Tough questions",
       headline: "Addressing Concerns",
       bullets: [
-        "Why not disable Helios?: We need efficiency, but fairness comes first",
+        "Why not disable Helios? We need efficiency, but fairness comes first",
         "Won't transparency hurt profits?: Trust is our competitive advantage",
         "What if competitors don't follow?: We lead on integrity, not follow the pack"
       ]
@@ -622,7 +653,10 @@ export default function LeedsScrollDeck() {
             transition={{ duration: 0.4, ease: "easeInOut" }}
           >
             <div className="flex items-center gap-8">
-              <h3 className="text-sm font-semibold tracking-tight">{DATA.event.team}</h3>
+              <div className="flex flex-col">
+                <h3 className="text-sm font-semibold tracking-tight">{DATA.event.team}</h3>
+                <p className="text-xs text-black/50">{DATA.event.teamMembers}</p>
+              </div>
               <div className="hidden md:flex items-center gap-6 text-xs text-black/60">
                 {DATA.sections.slice(0, 5).map((s) => (
                   <a key={s.id} href={`#${s.id}`} className="hover:text-black transition-colors uppercase tracking-wider">
@@ -707,7 +741,7 @@ export default function LeedsScrollDeck() {
             {DATA.event.title}
           </motion.p>
           <motion.h1 
-            className="text-6xl md:text-8xl font-bold leading-[0.95] tracking-tight mb-6"
+            className="text-5xl md:text-6xl font-bold leading-[0.95] tracking-tight mb-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ 
@@ -789,25 +823,30 @@ export default function LeedsScrollDeck() {
               transition={{ duration: 0.8 }}
             >
               {/* Section number and kicker with varied animation */}
-              <motion.div 
-                className="flex items-baseline gap-4 mb-4"
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-20%" }}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: 0.1,
-                  type: "spring",
-                  stiffness: 120
-                }}
-              >
-                <span className="text-4xl font-bold text-black/10">
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <p className="text-black/40 uppercase tracking-[0.25em] text-[10px] font-medium">{s.kicker}</p>
-              </motion.div>
+              {s.template !== 'transition' && (
+                <motion.div 
+                  className="flex items-baseline gap-4 mb-4"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-20%" }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: 0.1,
+                    type: "spring",
+                    stiffness: 120
+                  }}
+                >
+                  <span className="text-5xl font-bold text-black/10">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <p className="text-black/40 uppercase tracking-[0.25em] text-sm font-medium">{s.kicker}</p>
+                </motion.div>
+              )}
+              
               <motion.h2 
-                className="text-3xl md:text-5xl font-bold leading-[1.05] tracking-tight mb-8"
+                className={s.template === 'transition' 
+                  ? "text-6xl md:text-8xl font-bold leading-[1.0] tracking-tight text-center" 
+                  : "text-3xl md:text-5xl font-bold leading-[1.05] tracking-tight mb-8"}
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-20%" }}
@@ -824,40 +863,9 @@ export default function LeedsScrollDeck() {
               </motion.h2>
 
             <div className="w-full">
-              {/* Render special components */}
-              {(s as any).showMap && <MountainWestMap />}
-
-              {(s as any).showQRCode && (
-                <motion.div
-                  className="flex flex-col items-center gap-4 my-8 p-6 bg-white/50 rounded-2xl border border-black/10"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <div className="bg-white p-4 rounded-xl shadow-lg">
-                    <img 
-                      src="/qr-demo.png" 
-                      alt="QR Code to Demo"
-                      width={200}
-                      height={200}
-                      className="block"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-gray-900">Try it yourself!</p>
-                    <p className="text-sm text-gray-600">Scan to see the customer experience</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {(s as any).showEscalation && <EscalationDiagram />}
-              
-              {(s as any).showPriceChart && <PriceGuardrailsChart />}
-
-              {/* Template-based content rendering */}
+              {/* Template-based content rendering - render bullets first for intro slide */}
             {s.template === 'standard' && s.bullets && (
-              <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed">
+              <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed mb-8">
                 {s.bullets.map((b, i) => (
                   <motion.li 
                     key={i} 
@@ -880,6 +888,53 @@ export default function LeedsScrollDeck() {
                 ))}
               </ul>
             )}
+
+              {/* Render special components */}
+              {(s as any).showMap && <MountainWestMap />}
+
+              {(s as any).showDanielsLogo && (
+                <motion.div
+                  className="flex justify-center my-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <img 
+                    src="/logo.png" 
+                    alt="Daniels Fund Ethics Initiative"
+                    className="h-16 object-contain"
+                  />
+                </motion.div>
+              )}
+
+              {(s as any).showQRCode && (
+                <motion.div
+                  className="flex flex-col items-center gap-4 my-8 p-6 bg-white/50 rounded-2xl border border-black/10"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <a href="/demo" className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                    <img 
+                      src="/qr-demo.png" 
+                      alt="QR Code to Demo"
+                      width={200}
+                      height={200}
+                      className="block"
+                    />
+                  </a>
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-900">Try it yourself!</p>
+                    <p className="text-sm text-gray-600">Scan to see the customer experience <span className="text-blue-600">or click the QR code</span></p>
+                  </div>
+                </motion.div>
+              )}
+
+              {(s as any).showEscalation && <EscalationDiagram />}
+              
+              {(s as any).showPriceChart && <PriceGuardrailsChart />}
 
             {s.template === 'emphasis' && s.bullets && (
               <ul className="space-y-6">
@@ -1003,7 +1058,7 @@ export default function LeedsScrollDeck() {
             }}
           >
             <TypewriterOnView 
-              text="Thank you — we welcome scrutiny."
+              text="Thank you, any questions?"
             />
           </motion.h2>
           <motion.p 
@@ -1018,7 +1073,6 @@ export default function LeedsScrollDeck() {
               stiffness: 100
             }}
           >
-            We'll publish our risk register and audit summary. Hold us to it.
           </motion.p>
           <motion.a 
             href="#hero" 
