@@ -191,11 +191,11 @@ const SupplyDemandGraph = () => {
 
   return (
     <div className="my-8 p-6 bg-white rounded-2xl border border-black/10 shadow-lg max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-900">Reducing Waste Through Price Adjustment</h3>
+      <div className="flex items-start justify-between gap-8 mb-8">
+        <h3 className="text-xl font-bold text-gray-900 flex-1">Reducing Waste Through Price Adjustment</h3>
         <button
           onClick={() => setShowShift(!showShift)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm whitespace-nowrap shrink-0"
         >
           {showShift ? 'Reset' : 'Lower Price'}
         </button>
