@@ -185,6 +185,167 @@ const EscalationDiagram = () => {
   );
 };
 
+// Supply and Demand Graph
+const SupplyDemandGraph = () => {
+  const [showShift, setShowShift] = useState(false);
+
+  return (
+    <motion.div
+      className="my-8 p-6 bg-white rounded-2xl border border-black/10 shadow-lg max-w-2xl mx-auto"
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-gray-900">Reducing Waste Through Price Adjustment</h3>
+        <button
+          onClick={() => setShowShift(!showShift)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+        >
+          {showShift ? 'Reset' : 'Show Effect'}
+        </button>
+      </div>
+      
+      <div className="relative h-72 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6">
+        <svg className="w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+          {/* Axes */}
+          <line x1="40" y1="260" x2="380" y2="260" stroke="#333" strokeWidth="2" />
+          <line x1="40" y1="260" x2="40" y2="20" stroke="#333" strokeWidth="2" />
+          
+          {/* Axis labels */}
+          <text x="380" y="280" fill="#666" fontSize="14" fontWeight="bold">Quantity</text>
+          <text x="10" y="25" fill="#666" fontSize="14" fontWeight="bold">Price</text>
+          
+          {/* Demand curve (downward sloping - stays fixed) */}
+          {/* D: from (60,60) to (350,240) */}
+          <motion.path
+            d="M 60 60 L 350 240"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            fill="none"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+          />
+          <text x="355" y="245" fill="#3b82f6" fontSize="14" fontWeight="bold">D</text>
+          
+          {/* Original Supply curve (upward sloping) */}
+          {/* S1: from (60,240) to (350,60) - intersects D at (205, 150) */}
+          <motion.path
+            d="M 60 240 L 350 60"
+            stroke={showShift ? "#94a3b8" : "#ef4444"}
+            strokeWidth="3"
+            fill="none"
+            strokeDasharray={showShift ? "5,5" : "0"}
+            initial={{ pathLength: 0 }}
+            animate={{ 
+              pathLength: 1,
+              opacity: showShift ? 0.4 : 1
+            }}
+            transition={{ duration: 1, delay: 0.5 }}
+          />
+          {!showShift && <text x="355" y="65" fill="#ef4444" fontSize="14" fontWeight="bold">S₁</text>}
+          
+          {/* New Supply curve (shifted right/down) */}
+          {/* S2: from (100,240) to (390,60) - intersects D at (245, 171) */}
+          <motion.path
+            d="M 100 240 L 390 60"
+            stroke="#ef4444"
+            strokeWidth="3"
+            fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ 
+              pathLength: showShift ? 1 : 0,
+              opacity: showShift ? 1 : 0
+            }}
+            transition={{ duration: 1 }}
+          />
+          {showShift && <text x="365" y="55" fill="#ef4444" fontSize="14" fontWeight="bold">S₂</text>}
+          
+          {/* Original equilibrium point (S1 intersects D at x=205, y=150) */}
+          <motion.circle
+            cx="205"
+            cy="150"
+            r="6"
+            fill={showShift ? "#94a3b8" : "#8b5cf6"}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 1.5 }}
+          />
+          <motion.line
+            x1="205"
+            y1="150"
+            x2="205"
+            y2="260"
+            stroke={showShift ? "#94a3b8" : "#8b5cf6"}
+            strokeWidth="1.5"
+            strokeDasharray="5,5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5, delay: 1.7 }}
+          />
+          <motion.line
+            x1="205"
+            y1="150"
+            x2="40"
+            y2="150"
+            stroke={showShift ? "#94a3b8" : "#8b5cf6"}
+            strokeWidth="1.5"
+            strokeDasharray="5,5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5, delay: 1.7 }}
+          />
+          
+          {/* New equilibrium point (S2 intersects D at x=225, y=162) */}
+          <motion.circle
+            cx="225"
+            cy="162"
+            r="6"
+            fill="#10b981"
+            initial={{ scale: 0 }}
+            animate={{ scale: showShift ? 1 : 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          />
+          <motion.line
+            x1="225"
+            y1="162"
+            x2="225"
+            y2="260"
+            stroke="#10b981"
+            strokeWidth="1.5"
+            strokeDasharray="5,5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: showShift ? 1 : 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          />
+          <motion.line
+            x1="225"
+            y1="162"
+            x2="40"
+            y2="162"
+            stroke="#10b981"
+            strokeWidth="1.5"
+            strokeDasharray="5,5"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: showShift ? 1 : 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          />
+          
+          {/* Quantity labels */}
+          <text x="198" y="280" fill={showShift ? "#94a3b8" : "#8b5cf6"} fontSize="12" fontWeight="bold">Q₁</text>
+          {showShift && <text x="218" y="280" fill="#10b981" fontSize="12" fontWeight="bold">Q₂</text>}
+          
+          {/* Price labels */}
+          <text x="10" y="155" fill={showShift ? "#94a3b8" : "#8b5cf6"} fontSize="12" fontWeight="bold">P₁</text>
+          {showShift && <text x="10" y="167" fill="#10b981" fontSize="12" fontWeight="bold">P₂</text>}
+        </svg>
+      </div>
+    </motion.div>
+  );
+};
+
 // Price Guardrails Chart
 const PriceGuardrailsChart = () => {
   const [mounted, setMounted] = useState(false);
@@ -482,11 +643,12 @@ const DATA = {
       template: "standard",
       kicker: "Preventing the dependence tax",
       headline: "Protecting Vulnerable Customers",
+      showSupplyDemand: true,
       bullets: [
         "Price ceiling and floor for all goods",
         "Late-hour freeze",
         "Lowering waste",
-        "Interactive kiosks & product QR codes"
+        "Product QR codes & interactive kiosks"
       ]
     },
     {
@@ -496,6 +658,7 @@ const DATA = {
       kicker: "Full disclosure",
       headline: "ShelfSense Mobile App",
       bullets: [
+        "Transparency",
         "Live price updates",
         "Price history: customers know prices aren't personalized",
         "Price changed? See which factors influence it most."
@@ -531,9 +694,8 @@ const DATA = {
       showPriceChart: true,
       bullets: [
         "Past year of price data from 5-miles radius as baseline",
-        "Helios bounded relative to standard deviations from yearly mean",
-        "Ethics department approves all framing engine copy before customer-facing deployment",
         "Fresh data",
+        "Ethics department approves all framing engine copy before customer-facing deployment",
         "Third-party audits",
         "Annual ethics certification/training"
       ]
@@ -558,8 +720,8 @@ const DATA = {
       headline: "Addressing Concerns",
       bullets: [
         "Why not disable Helios? We need efficiency, but fairness comes first",
-        "Won't transparency hurt profits?: Trust is our competitive advantage",
-        "What if competitors don't follow?: We lead on integrity, not follow the pack"
+        "Won't transparency hurt profits? Trust is our competitive advantage",
+        "Long & Short Term Goals"
       ]
     }
   ]
@@ -933,6 +1095,8 @@ export default function LeedsScrollDeck() {
               )}
 
               {(s as any).showEscalation && <EscalationDiagram />}
+              
+              {(s as any).showSupplyDemand && <SupplyDemandGraph />}
               
               {(s as any).showPriceChart && <PriceGuardrailsChart />}
 
