@@ -190,20 +190,14 @@ const SupplyDemandGraph = () => {
   const [showShift, setShowShift] = useState(false);
 
   return (
-    <motion.div
-      className="my-8 p-6 bg-white rounded-2xl border border-black/10 shadow-lg max-w-2xl mx-auto"
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-    >
+    <div className="my-8 p-6 bg-white rounded-2xl border border-black/10 shadow-lg max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-gray-900">Reducing Waste Through Price Adjustment</h3>
         <button
           onClick={() => setShowShift(!showShift)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
         >
-          {showShift ? 'Reset' : 'Show Effect'}
+          {showShift ? 'Reset' : 'Lower Price'}
         </button>
       </div>
       
@@ -218,62 +212,33 @@ const SupplyDemandGraph = () => {
           <text x="10" y="25" fill="#666" fontSize="14" fontWeight="bold">Price</text>
           
           {/* Demand curve (downward sloping - stays fixed) */}
-          {/* D: from (60,60) to (350,240) */}
-          <motion.path
+          <path
             d="M 60 60 L 350 240"
             stroke="#3b82f6"
             strokeWidth="3"
             fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
           />
           <text x="355" y="245" fill="#3b82f6" fontSize="14" fontWeight="bold">D</text>
           
-          {/* Original Supply curve (upward sloping) */}
-          {/* S1: from (60,240) to (350,60) - intersects D at (205, 150) */}
-          <motion.path
+          {/* Supply curve (upward sloping - stays fixed) */}
+          <path
             d="M 60 240 L 350 60"
-            stroke={showShift ? "#94a3b8" : "#ef4444"}
-            strokeWidth="3"
-            fill="none"
-            strokeDasharray={showShift ? "5,5" : "0"}
-            initial={{ pathLength: 0 }}
-            animate={{ 
-              pathLength: 1,
-              opacity: showShift ? 0.4 : 1
-            }}
-            transition={{ duration: 1, delay: 0.5 }}
-          />
-          {!showShift && <text x="355" y="65" fill="#ef4444" fontSize="14" fontWeight="bold">S₁</text>}
-          
-          {/* New Supply curve (shifted right/down) */}
-          {/* S2: from (100,240) to (390,60) - intersects D at (245, 171) */}
-          <motion.path
-            d="M 100 240 L 390 60"
             stroke="#ef4444"
             strokeWidth="3"
             fill="none"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ 
-              pathLength: showShift ? 1 : 0,
-              opacity: showShift ? 1 : 0
-            }}
-            transition={{ duration: 1 }}
           />
-          {showShift && <text x="365" y="55" fill="#ef4444" fontSize="14" fontWeight="bold">S₂</text>}
+          <text x="355" y="65" fill="#ef4444" fontSize="14" fontWeight="bold">S</text>
           
-          {/* Original equilibrium point (S1 intersects D at x=205, y=150) */}
-          <motion.circle
+          {/* Original equilibrium point A (higher price, lower quantity) */}
+          {/* Point A at intersection: x=205, y=150 */}
+          <circle
             cx="205"
             cy="150"
             r="6"
             fill={showShift ? "#94a3b8" : "#8b5cf6"}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 1.5 }}
+            style={{ transition: 'fill 0.3s ease' }}
           />
-          <motion.line
+          <line
             x1="205"
             y1="150"
             x2="205"
@@ -281,11 +246,12 @@ const SupplyDemandGraph = () => {
             stroke={showShift ? "#94a3b8" : "#8b5cf6"}
             strokeWidth="1.5"
             strokeDasharray="5,5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5, delay: 1.7 }}
+            style={{ 
+              opacity: showShift ? 0.5 : 1,
+              transition: 'opacity 0.3s ease, stroke 0.3s ease'
+            }}
           />
-          <motion.line
+          <line
             x1="205"
             y1="150"
             x2="40"
@@ -293,56 +259,87 @@ const SupplyDemandGraph = () => {
             stroke={showShift ? "#94a3b8" : "#8b5cf6"}
             strokeWidth="1.5"
             strokeDasharray="5,5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.5, delay: 1.7 }}
+            style={{ 
+              opacity: showShift ? 0.5 : 1,
+              transition: 'opacity 0.3s ease, stroke 0.3s ease'
+            }}
           />
           
-          {/* New equilibrium point (S2 intersects D at x=225, y=162) */}
-          <motion.circle
-            cx="225"
-            cy="162"
+          {/* New equilibrium point B (lower price, higher quantity) */}
+          {/* Moving down the demand curve to x=270, y=190 */}
+          <circle
+            cx="270"
+            cy="190"
             r="6"
             fill="#10b981"
-            initial={{ scale: 0 }}
-            animate={{ scale: showShift ? 1 : 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            style={{ 
+              opacity: showShift ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
           />
-          <motion.line
-            x1="225"
-            y1="162"
-            x2="225"
+          <line
+            x1="270"
+            y1="190"
+            x2="270"
             y2="260"
             stroke="#10b981"
             strokeWidth="1.5"
             strokeDasharray="5,5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: showShift ? 1 : 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            style={{ 
+              opacity: showShift ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
           />
-          <motion.line
-            x1="225"
-            y1="162"
+          <line
+            x1="270"
+            y1="190"
             x2="40"
-            y2="162"
+            y2="190"
             stroke="#10b981"
             strokeWidth="1.5"
             strokeDasharray="5,5"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: showShift ? 1 : 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            style={{ 
+              opacity: showShift ? 1 : 0,
+              transition: 'opacity 0.3s ease'
+            }}
           />
+          
+          {/* Arrow showing movement along demand curve */}
+          {showShift && (
+            <g>
+              <path
+                d="M 205 150 Q 237 170, 270 190"
+                stroke="#10b981"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="4,4"
+              />
+              <polygon
+                points="270,190 265,185 268,178"
+                fill="#10b981"
+              />
+            </g>
+          )}
           
           {/* Quantity labels */}
           <text x="198" y="280" fill={showShift ? "#94a3b8" : "#8b5cf6"} fontSize="12" fontWeight="bold">Q₁</text>
-          {showShift && <text x="218" y="280" fill="#10b981" fontSize="12" fontWeight="bold">Q₂</text>}
+          {showShift && <text x="263" y="280" fill="#10b981" fontSize="12" fontWeight="bold">Q₂</text>}
           
           {/* Price labels */}
           <text x="10" y="155" fill={showShift ? "#94a3b8" : "#8b5cf6"} fontSize="12" fontWeight="bold">P₁</text>
-          {showShift && <text x="10" y="167" fill="#10b981" fontSize="12" fontWeight="bold">P₂</text>}
+          {showShift && <text x="10" y="195" fill="#10b981" fontSize="12" fontWeight="bold">P₂</text>}
+          
+          {/* Point labels on the curve */}
+          {!showShift && <text x="185" y="140" fill="#8b5cf6" fontSize="12" fontWeight="bold">A</text>}
+          {showShift && (
+            <>
+              <text x="185" y="140" fill="#94a3b8" fontSize="12" fontWeight="bold">A</text>
+              <text x="275" y="180" fill="#10b981" fontSize="12" fontWeight="bold">B</text>
+            </>
+          )}
         </svg>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -384,13 +381,7 @@ const PriceGuardrailsChart = () => {
   }
 
   return (
-    <motion.div
-      className="my-12 p-8 bg-white rounded-2xl border border-black/10 shadow-lg"
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-    >
+    <div className="my-12 p-8 bg-white rounded-2xl border border-black/10 shadow-lg">
       <h3 className="text-2xl font-bold mb-6 text-gray-900">Price Boundaries</h3>
       
       <div className="relative h-80">
@@ -404,36 +395,28 @@ const PriceGuardrailsChart = () => {
         {/* Chart area */}
         <div className="ml-14 h-full relative">
           {/* Upper bound line (red) */}
-          <motion.div
+          <div
             className="absolute w-full border-t-2 border-red-500 border-dashed"
             style={{ top: '15%' }}
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.5 }}
           >
             <span className="absolute -top-6 right-0 text-xs font-semibold text-red-600">
               Upper Bound (+$0.15)
             </span>
-          </motion.div>
+          </div>
 
           {/* Lower bound line (red) */}
-          <motion.div
+          <div
             className="absolute w-full border-t-2 border-red-500 border-dashed"
             style={{ bottom: '15%' }}
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.5 }}
           >
             <span className="absolute -bottom-6 right-0 text-xs font-semibold text-red-600">
               Lower Bound (-$0.15)
             </span>
-          </motion.div>
+          </div>
 
           {/* Historical price line (blue) */}
           <svg className="w-full h-full" viewBox={`0 0 ${dataPoints * 10} 100`} preserveAspectRatio="none">
-            <motion.path
+            <path
               d={historicalPrices.map((price, i) => {
                 const x = i * 10;
                 const y = 100 - ((price - chartMin) / (chartMax - chartMin)) * 100;
@@ -442,10 +425,6 @@ const PriceGuardrailsChart = () => {
               stroke="#3B82F6"
               strokeWidth="3"
               fill="none"
-              initial={{ pathLength: 0 }}
-              whileInView={{ pathLength: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 2, ease: "easeInOut" }}
             />
           </svg>
 
@@ -467,68 +446,44 @@ const PriceGuardrailsChart = () => {
           <span className="text-gray-700">AI Price Boundaries</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 // Animated Eye Icon for Transparency
 const AnimatedEye = () => {
   return (
-    <motion.svg
+    <svg
       width="80"
       height="80"
       viewBox="0 0 24 24"
       fill="none"
       className="mx-auto mb-8"
-      initial={{ scale: 0, rotate: -180 }}
-      whileInView={{ scale: 1, rotate: 0 }}
-      viewport={{ once: true, margin: "-20%" }}
-      transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
     >
       {/* Eye outline */}
-      <motion.path
+      <path
         d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5z"
         stroke="currentColor"
         strokeWidth="1.5"
         fill="none"
-        initial={{ pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
       />
       {/* Iris */}
-      <motion.circle
+      <circle
         cx="12"
         cy="12.5"
         r="3.5"
         stroke="currentColor"
         strokeWidth="1.5"
         fill="none"
-        animate={{
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       />
       {/* Pupil */}
-      <motion.circle
+      <circle
         cx="12"
         cy="12.5"
         r="1.5"
         fill="currentColor"
-        animate={{
-          scale: [1, 0.8, 1],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       />
-    </motion.svg>
+    </svg>
   );
 };
 
@@ -870,103 +825,46 @@ export default function LeedsScrollDeck() {
         className="relative flex items-center justify-center min-h-screen px-6 pt-20 overflow-hidden snap-start snap-always"
       >
         {/* Geometric background shape with parallax */}
-        <motion.div 
+        <div 
           className="absolute inset-0 overflow-hidden"
-          style={{ opacity: heroOpacity }}
+          style={{ opacity: 0.5 }}
         >
-          <motion.div 
+          <div 
             className="absolute top-0 right-0 w-2/3 h-2/3 bg-black/2 transform rotate-12 translate-x-1/4 -translate-y-1/4"
-            style={{ y: useTransform(heroProgress, [0, 1], [0, -100]) }}
           />
-        </motion.div>
+        </div>
         
-        <motion.div 
-          className="relative max-w-6xl mx-auto"
-          style={{ 
-            opacity: heroOpacity,
-            scale: heroScale,
-            y: heroY,
-            filter: useTransform(heroBlur, (v) => `blur(${v}px)`)
-          }}
-        >
-          <motion.p 
-            className="uppercase tracking-[0.25em] text-[10px] font-medium text-black/40 mb-3"
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.2,
-              type: "spring",
-              stiffness: 100
-            }}
-          >
+        <div className="relative max-w-6xl mx-auto">
+          <p className="uppercase tracking-[0.25em] text-[10px] font-medium text-black/40 mb-3">
             {DATA.event.title}
-          </motion.p>
-          <motion.h1 
-            className="text-5xl md:text-6xl font-bold leading-[0.95] tracking-tight mb-6"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.4,
-              type: "spring",
-              stiffness: 80
-            }}
-          >
+          </p>
+          <h1 className="text-5xl md:text-6xl font-bold leading-[0.95] tracking-tight mb-6">
             <TypewriterOnView 
               text={DATA.caseTitle}
             />
-          </motion.h1>
-          <motion.p 
-            className="text-xl md:text-2xl text-black/70 max-w-4xl leading-relaxed mb-10"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.6,
-              type: "spring",
-              stiffness: 90
-            }}
-          >
+          </h1>
+          <p className="text-xl md:text-2xl text-black/70 max-w-4xl leading-relaxed mb-10">
             {DATA.assertion}
-          </motion.p>
-          <motion.div 
-            className="flex items-center gap-4"
-            initial={{ opacity: 0, y: 30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.8,
-              type: "spring",
-              stiffness: 100
-            }}
-          >
-            <motion.a 
+          </p>
+          <div className="flex items-center gap-4">
+            <a 
               href="#opening" 
               className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium bg-black text-white hover:bg-black/90 transition-colors"
-              whileHover={{ scale: 1.05, x: 5 }}
-              whileTap={{ scale: 0.95 }}
             >
               Explore Now →
-            </motion.a>
-            <motion.a 
+            </a>
+            <a 
               href="#rec" 
               className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-black/20 hover:border-black/40 transition-colors"
-              whileHover={{ scale: 1.05, borderColor: "rgba(0,0,0,0.6)" }}
-              whileTap={{ scale: 0.95 }}
             >
               Jump to Recommendation
-            </motion.a>
-          </motion.div>
-        </motion.div>
+            </a>
+          </div>
+        </div>
         
-        <motion.div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-black/30 text-xs"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-black/30 text-xs animate-bounce">
           ↓
-        </motion.div>
+        </div>
       </section>
 
       {/* Panels - Apple-style scroll animations */}
@@ -986,67 +884,38 @@ export default function LeedsScrollDeck() {
             >
               {/* Section number and kicker with varied animation */}
               {s.template !== 'transition' && (
-                <motion.div 
-                  className="flex items-baseline gap-4 mb-4"
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-20%" }}
-                  transition={{ 
-                    duration: 0.6, 
-                    delay: 0.1,
-                    type: "spring",
-                    stiffness: 120
-                  }}
-                >
+                <div className="flex items-baseline gap-4 mb-4">
                   <span className="text-5xl font-bold text-black/10">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
                   <p className="text-black/40 uppercase tracking-[0.25em] text-sm font-medium">{s.kicker}</p>
-                </motion.div>
+                </div>
               )}
               
-              <motion.h2 
+              <h2 
                 className={s.template === 'transition' 
-                  ? "text-6xl md:text-8xl font-bold leading-[1.0] tracking-tight text-center" 
+                  ? "text-6xl md:text-8xl font-bold leading-none tracking-tight text-center" 
                   : "text-3xl md:text-5xl font-bold leading-[1.05] tracking-tight mb-8"}
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-20%" }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: 0.2,
-                  type: "spring",
-                  stiffness: 80
-                }}
               >
                 <TypewriterOnView 
                   text={s.headline}
                 />
-              </motion.h2>
+              </h2>
 
             <div className="w-full">
               {/* Template-based content rendering - render bullets first for intro slide */}
             {s.template === 'standard' && s.bullets && (
               <ul className="space-y-5 text-lg md:text-xl text-black/80 leading-relaxed mb-8">
                 {s.bullets.map((b, i) => (
-                  <motion.li 
+                  <li 
                     key={i} 
                     className="flex items-start gap-4 group"
-                    initial={{ opacity: 0, x: -30, y: 10 }}
-                    whileInView={{ opacity: 1, x: 0, y: 0 }}
-                    viewport={{ once: true, margin: "-20%" }}
-                    transition={{ duration: 0.6, delay: 0.3 + i * 0.08, type: "spring", stiffness: 120 }}
-                    whileHover={{ x: 10, scale: 1.02, transition: { duration: 0.2 } }}
                   >
-                    <motion.span 
-                      className="text-black/20 font-mono text-lg mt-2 group-hover:text-black/60 transition-colors"
-                      whileHover={{ rotate: 90, scale: 1.3 }}
-                      transition={{ duration: 0.3 }}
-                    >
+                    <span className="text-black/20 font-mono text-lg mt-2 group-hover:text-black/60 transition-colors">
                       —
-                    </motion.span>
+                    </span>
                     <span dangerouslySetInnerHTML={{ __html: b }} className="flex-1" />
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
             )}
@@ -1055,29 +924,17 @@ export default function LeedsScrollDeck() {
               {(s as any).showMap && <MountainWestMap />}
 
               {(s as any).showDanielsLogo && (
-                <motion.div
-                  className="flex justify-center my-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
+                <div className="flex justify-center my-8">
                   <img 
                     src="/logo.png" 
                     alt="Daniels Fund Ethics Initiative"
                     className="h-16 object-contain"
                   />
-                </motion.div>
+                </div>
               )}
 
               {(s as any).showQRCode && (
-                <motion.div
-                  className="flex flex-col items-center gap-4 my-8 p-6 bg-white/50 rounded-2xl border border-black/10"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
+                <div className="flex flex-col items-center gap-4 my-8 p-6 bg-white/50 rounded-2xl border border-black/10">
                   <a href="/demo" className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
                     <img 
                       src="/qr-demo.png" 
@@ -1091,7 +948,7 @@ export default function LeedsScrollDeck() {
                     <p className="text-lg font-semibold text-gray-900">Try it yourself!</p>
                     <p className="text-sm text-gray-600">Scan to see the customer experience <span className="text-blue-600">or click the QR code</span></p>
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {(s as any).showEscalation && <EscalationDiagram />}
@@ -1103,42 +960,27 @@ export default function LeedsScrollDeck() {
             {s.template === 'emphasis' && s.bullets && (
               <ul className="space-y-6">
                 {s.bullets.map((b, i) => (
-                  <motion.li
+                  <li
                     key={i}
                     className="text-xl md:text-2xl font-medium text-black/90 border-l-4 border-black pl-6 py-2"
-                    initial={{ opacity: 0, x: -50, scale: 0.95 }}
-                    whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                    viewport={{ once: true, margin: "-20%" }}
-                    transition={{ duration: 0.7, delay: 0.3 + i * 0.1, type: "spring", stiffness: 100 }}
                   >
                     {b}
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
             )}
 
             {s.template === 'grid' && s.bullets && (
-              <motion.div 
-                className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-20%" }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-              >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
                 {s.bullets.map((b, i) => (
-                  <motion.div
+                  <div
                     key={i}
                     className="border border-black/10 p-6 text-center hover:border-black/30 transition-all hover:shadow-lg"
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-20%" }}
-                    transition={{ duration: 0.5, delay: 0.4 + i * 0.08 }}
-                    whileHover={{ y: -5, scale: 1.05 }}
                   >
                     <p className="text-xl md:text-2xl font-semibold text-black/90">{b}</p>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             )}
 
             {s.template === 'split' && (s as any).sections && (
