@@ -602,7 +602,7 @@ const DATA = {
       bullets: [
         "Price ceiling and floor for all goods",
         "Late-hour freeze",
-        "Lowering waste",
+        "Ethics committee",
         "Product QR codes & interactive kiosks"
       ]
     },
